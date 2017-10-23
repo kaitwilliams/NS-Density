@@ -12,4 +12,4 @@ for num in range(1,21):
         string = string + "Buzz"
     if num % 5 != 0 and num % 3 != 0:
         string = string + str(num)
-print(string)
+    print(string)
