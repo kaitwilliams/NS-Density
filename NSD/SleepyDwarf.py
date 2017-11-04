@@ -9,10 +9,12 @@ e0= 1
 R0 = 1.47
 K = 5
 powerstuff = 4/3.
-p0 = 10
+p0 = 1000
 
-alpha = R0/(K*(e0**(powerstuff-1)))**(1/powerstuff)
-beta = (4*math.pi*e0)/((c**2)*(K*e0**(powerstuff-1))**(1/powerstuff))
+alpha = 1.476
+beta = 0.03788
+#alpha = R0/(K*(e0**(powerstuff-1)))**(1/powerstuff)
+#beta = (4*math.pi*e0)/((c**2)*(K*e0**(powerstuff-1))**(1/powerstuff))
 # BOTH OF THE ABOVE ARE IN M^2, CHANGE TO KM AT SOME POINT
 # need some function for density
 
@@ -20,46 +22,40 @@ beta = (4*math.pi*e0)/((c**2)*(K*e0**(powerstuff-1))**(1/powerstuff))
 # SOLAR MASSES & UNITLESS
 #
 def diffpressure(p, r, m):
-     return r+1 + p + m
+     return -(alpha*(p**(1./powerstuff))*m/(r**2))
 #    return -(g*epsilon(r)*mass(r))/((r*c)**2)
 def diffmass(p, r):
-    return r-1 + p
-# def epsilon(r)
-
-# def (p,r):
-#
-#	return
-# def g(m,r):
-#	return 4*(r**2)epsilon(r)/(c**2) <--ooo that'll be trouble
-
-# unedited RK2 RK4 code. Need to modify for range of numbers and
-# incorporate second function.
+    return (p**(1./powerstuff))*beta*r**2
 
 
 
-def solve_rk4_coupled(f, g, p0, m0, N, rfinal):
+
+def solve_rk4_coupled(mass, pressure, p0, m0, N, rinitial, rfinal):
     p = p0
     m = m0
-    h = (rfinal - 0) / float(N)
-    rs = arange(0, rfinal, h)
+    h = (rfinal - rinitial) / float(N)
+    rs = arange(rinitial, rfinal, h)
     ps = []
     ms = []
     for r in rs:
+        print r, m, p
         ms.append(m)
         ps.append(p)
-        k1 = h * g(p, r)
-        l1 = h * f(p, m, r)
-        k2 = h * g(p + k1 / 2., r + h / 2.)
-        l2 = h * f(p + l1 / 2., r + h / 2., m + k1 / 2.)
-        k3 = h * g(p + k2 / 2., r + h / 2.)
-        l3 = h * f(p + l2 / 2., r + h / 2., m + k2 / 2.)
-        k4 = h * g(p + k3, r + h)
-        l4 = h * f(p + l3, r + h, m + k3)
+        k1 = h * mass(p, r)
+        l1 = h * pressure(p, r, m)
+        k2 = h * mass(p + k1 / 2., r + h / 2.)
+        l2 = h * pressure(p + l1 / 2., r + h / 2., m + k1 / 2.)
+        k3 = h * mass(p + k2 / 2., r + h / 2.)
+        l3 = h * pressure(p + l2 / 2., r + h / 2., m + k2 / 2.)
+        k4 = h * mass(p + k3, r + h)
+        l4 = h * pressure(p + l3, r + h, m + k3)
         p += 1 / 6. * (k1 + 2 * k2 + 2 * k3 + k4)
         m += 1 / 6. * (l1 + 2 * l2 + 2 * l3 + l4)
     return rs, ps, ms
 
-rs, ps, ms = solve_rk4_coupled(diffmass, diffpressure, p0, 0, 20, 20000)
-print alpha
-print beta
+rs, ps, ms = solve_rk4_coupled(diffmass, diffpressure, p0, 100, 100, 0.1, 10000)
+plot(rs, ps, 'r')
+#plot(rs, ms, 'b')
 
+
+show()
