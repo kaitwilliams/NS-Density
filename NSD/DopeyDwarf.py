@@ -2,6 +2,12 @@
 # SOLAR MASSES & UNITLESS
 # Kaitlin Williams
 #
+# TO DO
+# - for else loop for x iterations
+#   -> one return point, else set to NONE
+# - trying on other equation (pick a DE)
+# - put everything into an array (set of 3 each?)
+#
 #
 from numpy import arange #, seterr
 import math
@@ -38,14 +44,16 @@ def diffpressure(p, r, m):
  #    print "radius", r
   #   print "mass", m
  #
-     if m ==0:
-        return p
-     else:
-        return -(alpha*m*(p**(1./powerstuff)))/(r**2)
+#     if m ==0:
+#        return p
+#     else:
+#        return -(alpha*m*(p**(1./powerstuff)))/(r**2)
 #    return -(g*epsilon(r)*mass(r))/((r*c)**2)
 
+    return p**2 + m**2 + r
 def diffmass(p, r):
-    return (p**(1./powerstuff))*beta*r**2
+    return p + 2*r
+#    return (p**(1./powerstuff))*beta*r**2
 
 
 
@@ -53,15 +61,24 @@ def diffmass(p, r):
 def solve_rk4_coupled(mass, pressure, p0, m0, N, rinitial, rfinal):
     p = p0
     m = m0
-    h = (rfinal - rinitial) / float(N)
-    rs = arange(rinitial, rfinal, h)
-    ps = []
-    ms = []
+    r = rinitial
+#    h = (rfinal - rinitial) / float(N)
+#    rs = arange(rinitial, rfinal, h)
+#    ps = []
+#   ms = []
+    data = [r, p0, m0]
+    for i in range(1,100):
+
+        #do something
+        break
+    else:
+        data = None
+
+    return data
+
     for r in rs:
-        print r, m, p
-        print type(r), type(m), type(p)
-        ms.append(m)
-        ps.append(p)
+#        ms.append(m)
+#        ps.append(p)
         k1 = h * mass(p, r)
         l1 = h * pressure(p, r, m)
         k2 = h * mass(p + k1 / 2., r + h / 2.)
