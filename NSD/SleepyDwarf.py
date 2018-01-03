@@ -2,8 +2,7 @@
 # SOLAR MASSES & UNITLESS
 # Kaitlin Williams
 #
-#
-from numpy import arange #, seterr
+from numpy import arange
 import math
 from matplotlib.pyplot import *
 
