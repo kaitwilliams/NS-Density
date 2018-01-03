@@ -2,8 +2,7 @@
 # SOLAR MASSES & UNITLESS
 # Kaitlin Williams
 #
-#
-from numpy import arange #, seterr
+from numpy import arange
 import math
 from matplotlib.pyplot import *
 
@@ -58,8 +57,8 @@ def solve_rk4_coupled(mass, pressure, p0, m0, N, rinitial, rfinal):
     ps = []
     ms = []
     for r in rs:
-        print r, m, p
-        print type(r), type(m), type(p)
+        print "radius", r, "mass", m, "pressure", p
+#        print type(r), type(m), type(p)
         ms.append(m)
         ps.append(p)
         k1 = h * mass(p, r)
@@ -77,8 +76,8 @@ def solve_rk4_coupled(mass, pressure, p0, m0, N, rinitial, rfinal):
     return rs, ps, ms
 
 rs, ps, ms = solve_rk4_coupled(diffmass, diffpressure, p0, 0., 200, 0, 2.)
-#plot(rs, ps, 'r')
-plot(rs, ms, 'b')
+plot(rs, ps, 'r')
+#plot(rs, ms, 'b')
 
 
 show()
