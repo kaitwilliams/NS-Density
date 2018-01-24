@@ -9,27 +9,36 @@ import numpy as np
 import math
 from matplotlib.pyplot import *
 
-#seterr(all='print')
+np.seterr(all='print')
 
 g=6.673*(10**-8)
 c=299792458
 solarmass = 1.989*(10**30)
-powerstuff = 5./3
-R0 = 1.473
-K = (1./4.173)**(powerstuff-1)
 
-p0 = [10**-4]
-#p0 = np.arange(0.001,1.00,0.001,object)
+R0 = 1.476
 
+p0 = []
+i=0.00005
+
+while (i<30.0):
+    p0 += [i]
+    i += 0.01
+#p0 = [0.01]
 
 #-------------------------------
 # EQUATION OF STATE
-#alpha = R0/((K*(e0**(powerstuff-1))))**(1/powerstuff)
+# alpha = R0/((K*(e0**(powerstuff-1))))**(1/powerstuff)
+
+powerstuff1 = 3./5
+aNR = 2.4216
+powerstuff2 = 1.
+aR = 2.8663
+#K = (1./4.173)**(powerstuff-1)
 
 
 e0= 0.08969
-alpha = 1.
-beta = 0.7636
+alpha = 1.476
+beta = 0.03778
 
 #beta = (4*math.pi*e0)/((c**2)*solarmass*(K*(e0**(powerstuff-1)))**(1/powerstuff))
 
@@ -48,13 +57,18 @@ def diffpressure(p, r, m):
     :return: numerical output of equation 23
     '''
 
+
     if m ==0:
         return p
     if p <= 0 :
-        print "I'M NEGATIVE  ", p
         return -1
     else:
-        return -(alpha*m*(p**(1./powerstuff)))/(r**2)
+        new_EOS = (aNR*(p**powerstuff1) + aR*(p**powerstuff2))
+        term0 = -(alpha * m * (new_EOS)) / (r ** 2)
+        term1 = (1 + (p/(new_EOS)) * (R0 / alpha))
+        term2 = (1 + ((beta * R0) / (m * alpha)) * p * (r ** 2))
+        term3 = (1 - (2 * R0 * m) / r) ** (-1)
+        return term0*term1*term2*term3
 
 
 def diffmass(p, r):
@@ -67,9 +81,10 @@ def diffmass(p, r):
     :return: numerical output of equation 26
     '''
     if p <= 0 :
-        print "I'M NEGATIVE ", p
         return -1
-    return (p**(1./powerstuff))*beta*(r**2)
+    new_EOS = (aNR * (p ** powerstuff1) + aR * (p ** powerstuff2))
+
+    return (new_EOS)*beta*(r**2)
 
 
 
@@ -94,7 +109,7 @@ def solve_rk4_coupled(mass, pressure, p0, m0, N, rinitial, rfinal):
     h = (rfinal - rinitial) / float(N)
     data = [[r, p, m]]
     for i in range(1,N):
-        if i % 10000 == 0:
+        if i % 100000 == 0:
             print ".",
         l1 = h * mass(p, r)
         k1 = h * pressure(p, r, m)
@@ -111,7 +126,6 @@ def solve_rk4_coupled(mass, pressure, p0, m0, N, rinitial, rfinal):
             break
         data.append([r, p, m])
     else:
-        print data[-1]
         data = None
 
     return data
@@ -121,7 +135,7 @@ finalms = []
 
 
 for press in p0:
-    stardata = solve_rk4_coupled(diffmass, diffpressure, press, 0., 10000001, 0, 30.)
+    stardata = solve_rk4_coupled(diffmass, diffpressure, press, 0., 1000001, 0, 30)
     rs = []
     ms = []
     ps = []
@@ -130,12 +144,12 @@ for press in p0:
         rs.append(elem[0])
         ps.append(elem[1])
         ms.append(elem[2])
-#    finalrs.append(stardata[-1][0])
-#    finalms.append(stardata[-1][2])
-#    print stardata[-1]
+    finalrs.append(stardata[-1][0])
+    finalms.append(stardata[-1][2])
+    print stardata[-1]
 
-    plot(rs, ps, 'b')
+    #plot(rs, ps, 'r')
     #plot(rs, ms, 'b')
 
-#plot(finalrs, finalms, 'r')
+plot(finalrs, finalms, 'r')
 show()

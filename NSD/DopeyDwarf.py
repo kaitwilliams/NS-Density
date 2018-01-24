@@ -51,6 +51,17 @@ def diffmass(p, r):
 
 
 def solve_rk4_coupled(mass, pressure, p0, m0, N, rinitial, rfinal):
+    '''
+
+    :param mass:
+    :param pressure:
+    :param p0:
+    :param m0:
+    :param N: number of iterations
+    :param rinitial: starting radius
+    :param rfinal:
+    :return:
+    '''
     p = p0
     m = m0
     r = rinitial
