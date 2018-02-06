@@ -20,9 +20,9 @@ R0 = 1.476
 p0 = []
 i=0.00005
 
-while (i<30.0):
+while (i<40.0):
     p0 += [i]
-    i += 0.01
+    i += 0.1
 #p0 = [0.01]
 
 #-------------------------------
@@ -146,7 +146,7 @@ for press in p0:
         ms.append(elem[2])
     finalrs.append(stardata[-1][0])
     finalms.append(stardata[-1][2])
-    print stardata[-1]
+    #print stardata[-1]
 
     #plot(rs, ps, 'r')
     #plot(rs, ms, 'b')
