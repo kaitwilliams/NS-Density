@@ -18,7 +18,7 @@ powerstuff = 5./3
 R0 = 1.473
 K = (1./4.173)**(powerstuff-1)
 
-p0 = [10**-4]
+p0 = [10**-16]
 #p0 = np.arange(0.001,1.00,0.001,object)
 
 
@@ -28,8 +28,8 @@ p0 = [10**-4]
 
 
 e0= 0.08969
-alpha = 1.
-beta = 0.7636
+alpha = 0.05
+beta = 0.005924
 
 #beta = (4*math.pi*e0)/((c**2)*solarmass*(K*(e0**(powerstuff-1)))**(1/powerstuff))
 
@@ -121,7 +121,7 @@ finalms = []
 
 
 for press in p0:
-    stardata = solve_rk4_coupled(diffmass, diffpressure, press, 0., 10000001, 0, 30.)
+    stardata = solve_rk4_coupled(diffmass, diffpressure, press, 0., 10000001, 0, 200000.)
     rs = []
     ms = []
     ps = []
@@ -135,7 +135,7 @@ for press in p0:
 #    print stardata[-1]
 
     plot(rs, ps, 'b')
-    #plot(rs, ms, 'b')
+    #plot(rs, ms, 'r')
 
 #plot(finalrs, finalms, 'r')
 show()
