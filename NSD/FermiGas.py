@@ -7,16 +7,25 @@
 
 import numpy as np
 import math
+from scipy.integrate import odeint
 from matplotlib.pyplot import *
 
 np.seterr(all='print')
 
 g=6.673*(10**-8)
-c=299792458
-solarmass = 1.989*(10**30)
+c=2.998*(10**10)
+solarmass = 1.989*(10**33)
+hbar = 1.055*(10**-27)
+mneutron = 1.67*(10**-24)
 
-R0 = 1.476
-#p0 = [10**4]
+km3 = 10**15
+Mc2 = solarmass*(c**2)
+#e0init = (mneutron**4)*(c**8)/(3*(math.pi**2)*(hbar**3)*(c**3))
+#e0 = e0init*(km3/Mc2)
+e0 = 0.003006
+
+R0 = (g * solarmass/(c**2))/10**5
+#p0 = [0.01]
 p0 = np.logspace(-4,3,20)
 
 #while (i<20.0):
@@ -35,10 +44,11 @@ aR = 2.8663
 #K = (1./4.173)**(powerstuff-1)
 
 
-e0= 0.08969
-alpha = 1.476
-beta = 0.03778
 
+#alpha = R0
+alpha = 1.476
+#beta = (4*3.14*e0)
+beta = 0.03778
 #beta = (4*math.pi*e0)/((c**2)*solarmass*(K*(e0**(powerstuff-1)))**(1/powerstuff))
 
 #-------------------------------
@@ -47,7 +57,7 @@ def eos(p):
     return (aNR*(p**powerstuff1) + aR*(p**powerstuff2))
 
 
-def diffpressure(p, r, m):
+def diffpressure(p, r, m, p0):
     '''
     Diffpressure acts as the Newtonian differential pressure equation (one of two coupled equations involved in the TOV).
     If pressure is negative, throws large number wrench in the works to stop the process.
@@ -64,11 +74,21 @@ def diffpressure(p, r, m):
         return -1
     else:
         #new_EOS = (aNR*(p**powerstuff1) + aR*(p**powerstuff2))
-        term0 = -(alpha * m * (eos(p))) / (r ** 2)
-        term1 = (1 + (p/(eos(p)))* (R0 / alpha))
-        term2 = (1 + ((beta * R0 * p * (r ** 3))/ (m * alpha)))
-        term3 = (1 - (2 * R0 * m)/r)**(-1)
-        return term0*term1*term2*term3
+#        term0 = -(alpha * m * (eos(p))) / (r ** 2)
+        term0 = - (alpha * eos(p) * m)/(r**2)
+#        term1 = (1 + (p/(eos(p)))*(R0 / alpha))
+        term1 = 1 + (p/eos(p))
+   #     term2 = (1 + ((beta * R0 * p * (r ** 3))/ (m * alpha)))
+
+        if r < 0.1:
+            term2 = 1 + ((3*e0)/(solarmass * c**2))*p/eos(p0)
+        else:
+            term2 = 1 + ((4 * math.pi * e0)/(solarmass * c**2)) * r**3 * p/m
+  #      term3 = (1 - (2 * R0 * m)/r)**(-1)
+
+        term3 = 1 - (2*R0*m)/r
+        #term3 = 1 - (2*g*solarmass*m)/((c**2)*r)
+        return (term0*term1*term2)/term3
 
 
 def diffmass(p, r):
@@ -108,16 +128,16 @@ def solve_rk4_coupled(mass, pressure, p0, m0, N, rinitial, rfinal):
     data = [[r, p, m]]
     for i in range(1,N):
         l1 = h * mass(p, r)
-        k1 = h * pressure(p, r, m)
+        k1 = h * pressure(p, r, m, p0)
 
         l2 = h * mass(p + k1 / 2., r + h / 2.)
-        k2 = h * pressure(p + k1 / 2., r + h / 2., m + l1 / 2.)
+        k2 = h * pressure(p + k1 / 2., r + h / 2., m + l1 / 2., p0)
 
         l3 = h * mass(p + k2 / 2., r + h / 2.)
-        k3 = h * pressure(p + k2 / 2., r + h / 2., m + l2 / 2.)
+        k3 = h * pressure(p + k2 / 2., r + h / 2., m + l2 / 2., p0)
 
         l4 = h * mass(p + k3, r + h)
-        k4 = h * pressure(p + k3, r + h, m + l3)
+        k4 = h * pressure(p + k3, r + h, m + l3, p0)
 
         r += h
         p += (k1 + (2 * k2) + (2 * k3) + k4)/6.
@@ -135,7 +155,7 @@ finalms = []
 
 
 for press in p0:
-    stardata = solve_rk4_coupled(diffmass, diffpressure, press, 0., 2000, 0, 50)
+    stardata = solve_rk4_coupled(diffmass, diffpressure, press, 0., 2000, 0, 30)
     rs = []
     ms = []
     ps = []
@@ -146,7 +166,7 @@ for press in p0:
         ms.append(elem[2])
     finalrs.append(stardata[-1][0])
     finalms.append(stardata[-1][2])
-   # print stardata[-1]
+    print stardata[-1]
 
 
     #plot(rs, ps, 'r')
