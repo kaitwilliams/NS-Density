@@ -20,9 +20,9 @@ mneutron = 1.67*(10**-24)
 
 km3 = 10**15
 Mc2 = solarmass*(c**2)
-#e0init = (mneutron**4)*(c**8)/(3*(math.pi**2)*(hbar**3)*(c**3))
-#e0 = e0init*(km3/Mc2)
-e0 = 0.003006
+e0init = (mneutron**4)*(c**8)/(3*(math.pi**2)*(hbar**3)*(c**3))
+e0 = e0init*(km3/Mc2)
+kbarthing = 1
 
 R0 = (g * solarmass/(c**2))/10**5
 #p0 = [0.01]
@@ -45,12 +45,8 @@ aR = 2.8663
 
 
 
-#alpha = R0
-alpha = 1.476
-#beta = (4*3.14*e0)
-beta = 0.03778
-#beta = (4*math.pi*e0)/((c**2)*solarmass*(K*(e0**(powerstuff-1)))**(1/powerstuff))
-
+alpha = R0/kbarthing
+beta = (4*math.pi*e0)*(alpha/R0)
 #-------------------------------
 
 def eos(p):
@@ -73,22 +69,22 @@ def diffpressure(p, r, m, p0):
     if p <= 0 :
         return -1
     else:
-        #new_EOS = (aNR*(p**powerstuff1) + aR*(p**powerstuff2))
 #        term0 = -(alpha * m * (eos(p))) / (r ** 2)
         term0 = - (alpha * eos(p) * m)/(r**2)
 #        term1 = (1 + (p/(eos(p)))*(R0 / alpha))
-        term1 = 1 + (p/eos(p))
-   #     term2 = (1 + ((beta * R0 * p * (r ** 3))/ (m * alpha)))
+        term1 = 1 + (p/eos(p))*(R0/alpha)
+        #term2 = (1 + ((beta * R0 * p * (r ** 3))/ (m * alpha)))
 
-        if r < 0.1:
+        if r < 0.5:
             term2 = 1 + ((3*e0)/(solarmass * c**2))*p/eos(p0)
         else:
-            term2 = 1 + ((4 * math.pi * e0)/(solarmass * c**2)) * r**3 * p/m
-  #      term3 = (1 - (2 * R0 * m)/r)**(-1)
+            term2 = 1 + (beta) * r**3 * p/m
+        #term2 = 1 + (R0/alpha)*(beta)* r**3 * (p/m)
+        #term2 = 1
 
         term3 = 1 - (2*R0*m)/r
         #term3 = 1 - (2*g*solarmass*m)/((c**2)*r)
-        return (term0*term1*term2)/term3
+        return (term0*term1*term2)/(term3)
 
 
 def diffmass(p, r):
@@ -101,9 +97,8 @@ def diffmass(p, r):
     '''
     if p <= 0 :
         return -1
-   # new_EOS = (aNR * (p ** powerstuff1) + aR * (p ** powerstuff2))
 
-    return (eos(p))*beta*(r**2)
+    return (eos(p)*beta*(r**2))
 
 
 
